@@ -10,10 +10,10 @@ export class FileService {
 
   // POST /
   uploadFile(file: any){
+    console.log(file);
     const endpoint = this.baseURL + '/file';
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
-    return this.http
-      .post(endpoint, formData);
+    return this.http.post(endpoint, formData);
   }
 }

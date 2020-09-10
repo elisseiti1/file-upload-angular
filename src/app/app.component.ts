@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {FileService} from './file.service';
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -8,59 +9,64 @@ import {FileService} from './file.service';
 })
 export class AppComponent {
   title = 'my-new-app';
-  file: any[] = [];
-  imgArray: any[] = [];
+  file: [];
+  imgArray = [];
   imgTypes = ['jpg', 'jpeg', 'png', 'gif'];
 
-  constructor(fileService: FileService) {
+  constructor(private fileService: FileService) {
   }
-  async handleUploadChange(event: any) {
+  handleUploadChange(event: any): void {
 
     event.preventDefault();
     const files = event.target.files || [];
-    console.log(files);
-
-    const readUploadedFileAsDataUrl = (inputFile) => {
-      const fileReader = new FileReader();
-
-      return new Promise((resolve, reject) => {
-        fileReader.onerror = () => {
-          fileReader.abort();
-          reject(new DOMException('Problem parsing input file.'));
-        };
-        fileReader.readAsDataURL(inputFile);
-        fileReader.onloadend = () => {
-          resolve(fileReader.result);
-        };
-
-      });
-    };
     for (let index = 0; index < files.length; index++) {
-
+      const reader = new FileReader();
+      reader.readAsDataURL(event.target.files[index]);
+      reader.onload = (event: any) => {
+        if (reader.readyState === 2) {
           const extension = files[index].name.split('.').pop().toLowerCase();
-          if (this.imgTypes.indexOf(extension) > -1) {
-            console.log(files[index]);
-            readUploadedFileAsDataUrl(files[index]).then(e => {
-             this.imgArray.push(e);
-             console.log(e);
-            });
-          } else {
+          if ( this.imgTypes.indexOf(extension) > -1 )
+          {
+            this.imgArray.push(event.target.result);
+          }
+          else
+          {
             this.imgArray.push('');
           }
-
-          // this.imgArray.push(data);
+        }
+      };
     }
+    this.uploadFile(this.imgArray);
+  }
 
-    console.log(this.imgArray, 'lashi');
-    this.file = this.imgArray;
+  uploadFile(files){
+    if (files.length) {
+      files.forEach(async file => {
+        console.log(file);
+        this.fileService.uploadFile(file).subscribe(e => {
+          console.log(e);
+          console.log('UII');
+        });
+    });
+    }
   }
 
 
-
-
-
-
-
-
+    // const readUploadedFileAsBase64 = async (inputFile): Promise<Promise> => {
+    //   const temporaryFileReader = new FileReader();
+    //
+    //   return new Promise((resolve, reject) => {
+    //     temporaryFileReader.onerror = () => {
+    //       temporaryFileReader.abort();
+    //       reject(new DOMException('Problem parsing input file.'));
+    //     };
+    //
+    //     temporaryFileReader.onload = () => {
+    //       console.log(temporaryFileReader.result);
+    //       resolve(temporaryFileReader.result);
+    //     };
+    //     temporaryFileReader.readAsDataURL(inputFile);
+    //   });
+    // };
 
 }
