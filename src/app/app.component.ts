@@ -19,21 +19,36 @@ export class AppComponent {
     event.preventDefault();
     const files = event.target.files || [];
     console.log(files);
+
+    const readUploadedFileAsBase64 =  (inputFile) => {
+      const temporaryFileReader = new FileReader();
+
+      return new Promise((resolve, reject) => {
+        temporaryFileReader.onerror = () => {
+          temporaryFileReader.abort();
+          reject(new DOMException('Problem parsing input file.'));
+        };
+
+        temporaryFileReader.onload = () => {
+          console.log(temporaryFileReader.result)
+          resolve(temporaryFileReader.result);
+        };
+        temporaryFileReader.readAsDataURL(inputFile);
+      });
+    };
+
+
+
+
     for (let index = 0; index < files.length; index++) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.readyState === 2) {
           const extension = files[index].name.split('.').pop().toLowerCase();
           if (this.imgTypes.indexOf(extension) > -1) {
-            this.imgArray.push(reader.result);
+            readUploadedFileAsBase64(event.target.files[index]).then((value) => this.imgArray.push(value));
+          //  this.imgArray.push(readUploadedFileAsBase64(event.target.files[index]).then());
           } else {
             this.imgArray.push('');
           }
-          this.file = this.imgArray;
-        }
-      };
-
-      reader.readAsDataURL(event.target.files[index]);
     }
+    this.file = this.imgArray;
   }
 }
