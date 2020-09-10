@@ -8,32 +8,59 @@ import {FileService} from './file.service';
 })
 export class AppComponent {
   title = 'my-new-app';
-  file: [];
-  imgArray: any;
+  file: any[] = [];
+  imgArray: any[] = [];
   imgTypes = ['jpg', 'jpeg', 'png', 'gif'];
 
   constructor(fileService: FileService) {
   }
-  handleUploadChange(event: any) {
+  async handleUploadChange(event: any) {
 
     event.preventDefault();
     const files = event.target.files || [];
     console.log(files);
+
+    const readUploadedFileAsDataUrl = (inputFile) => {
+      const fileReader = new FileReader();
+
+      return new Promise((resolve, reject) => {
+        fileReader.onerror = () => {
+          fileReader.abort();
+          reject(new DOMException('Problem parsing input file.'));
+        };
+        fileReader.readAsDataURL(inputFile);
+        fileReader.onloadend = () => {
+          resolve(fileReader.result);
+        };
+
+      });
+    };
     for (let index = 0; index < files.length; index++) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.readyState === 2) {
+
           const extension = files[index].name.split('.').pop().toLowerCase();
           if (this.imgTypes.indexOf(extension) > -1) {
-            this.imgArray.push(reader.result);
+            console.log(files[index]);
+            readUploadedFileAsDataUrl(files[index]).then(e => {
+             this.imgArray.push(e);
+             console.log(e);
+            });
           } else {
             this.imgArray.push('');
           }
-          this.file = this.imgArray;
-        }
-      };
 
-      reader.readAsDataURL(event.target.files[index]);
+          // this.imgArray.push(data);
     }
+
+    console.log(this.imgArray, 'lashi');
+    this.file = this.imgArray;
   }
+
+
+
+
+
+
+
+
+
 }
