@@ -10,7 +10,7 @@ export class FileService {
 
   // POST /
   uploadFile(file: any){
-    console.log(file);
+    console.log(file, 'Lashi');
     const endpoint = this.baseURL + '/file';
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);

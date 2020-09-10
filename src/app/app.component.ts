@@ -15,58 +15,53 @@ export class AppComponent {
 
   constructor(private fileService: FileService) {
   }
-  handleUploadChange(event: any): void {
+  async handleUploadChange(event: any) {
 
     event.preventDefault();
     const files = event.target.files || [];
     for (let index = 0; index < files.length; index++) {
       const reader = new FileReader();
-      reader.readAsDataURL(event.target.files[index]);
-      reader.onload = (event: any) => {
-        if (reader.readyState === 2) {
-          const extension = files[index].name.split('.').pop().toLowerCase();
-          if ( this.imgTypes.indexOf(extension) > -1 )
-          {
-            this.imgArray.push(event.target.result);
-          }
-          else
-          {
-            this.imgArray.push('');
-          }
-        }
-      };
+      const extension = files[index].name.split('.').pop().toLowerCase();
+      const in_file = files[index];
+
+      if ( this.imgTypes.indexOf(extension) > -1 ) {
+        const readUploadedFileAsText = (inputFile) => {
+          const fileReader = new FileReader();
+
+          return new Promise((resolve, reject) => {
+            fileReader.onerror = () => {
+              fileReader.abort();
+              reject(new DOMException('Problem parsing input file.'));
+            };
+
+            fileReader.onload = () => {
+              resolve(fileReader.result);
+            };
+            fileReader.readAsDataURL(inputFile);
+          });
+        };
+
+        const fileContents = await readUploadedFileAsText(in_file);
+        this.imgArray.push(fileContents);
+      }
+      else{
+        this.imgArray.push('');
+      }
+
     }
+
+    // console.log(this.imgArray);
     this.uploadFile(this.imgArray);
   }
 
   uploadFile(files){
     if (files.length) {
       files.forEach(async file => {
-        console.log(file);
+        console.log(file, 'lesh');
         this.fileService.uploadFile(file).subscribe(e => {
-          console.log(e);
-          console.log('UII');
         });
     });
     }
   }
-
-
-    // const readUploadedFileAsBase64 = async (inputFile): Promise<Promise> => {
-    //   const temporaryFileReader = new FileReader();
-    //
-    //   return new Promise((resolve, reject) => {
-    //     temporaryFileReader.onerror = () => {
-    //       temporaryFileReader.abort();
-    //       reject(new DOMException('Problem parsing input file.'));
-    //     };
-    //
-    //     temporaryFileReader.onload = () => {
-    //       console.log(temporaryFileReader.result);
-    //       resolve(temporaryFileReader.result);
-    //     };
-    //     temporaryFileReader.readAsDataURL(inputFile);
-    //   });
-    // };
 
 }
