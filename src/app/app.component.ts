@@ -58,8 +58,7 @@ export class AppComponent {
     if (files.length) {
       files.forEach(async file => {
         console.log(file, 'lesh');
-        this.fileService.uploadFile(file).subscribe(e => {
-        });
+        this.fileService.uploadFile(file)
     });
     }
   }
